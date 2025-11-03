@@ -1,0 +1,315 @@
+  {
+  "name": "curatedTCGAData-mcp",
+  "version": "1.0.0",
+  "description": "Conversational tools for accessing and working with TCGA cancer genomics data through the curatedTCGAData Bioconductor package",
+  "tools": [
+    {
+      "name": "list_cancer_types",
+      "description": "List all available TCGA cancer types with their disease codes and descriptions",
+      "parameters": {},
+      "returns": {
+        "type": "data.frame",
+        "description": "Data frame with columns: Code (disease abbreviation), Name (full cancer name), Subtype_Data (whether subtype data is available)"
+      },
+      "examples": [
+        "What cancer types are available?",
+        "Show me all TCGA disease codes",
+        "List all available cancers"
+      ]
+    },
+    {
+      "name": "list_assays_for_disease",
+      "description": "Show what data types (assays) are available for a specific TCGA disease code",
+      "parameters": {
+        "diseaseCode": {
+          "type": "character",
+          "required": true,
+          "description": "TCGA disease code (e.g., 'BRCA', 'COAD', 'LUAD')"
+        },
+        "version": {
+          "type": "character",
+          "required": false,
+          "default": "2.1.1",
+          "description": "Data version to query"
+        }
+      },
+      "returns": {
+        "type": "list",
+        "description": "List containing diseaseCode, version, available_assays (character vector), and count"
+      },
+      "examples": [
+        "What assays are available for breast cancer?",
+        "Show me data types for BRCA",
+        "What can I download for ovarian cancer?"
+      ]
+    },
+    {
+      "name": "build_tcga_mae",
+      "description": "Build a MultiAssayExperiment object with specified disease codes and assay types. Supports wildcards in assay names (e.g., 'CN*' for all copy number data)",
+      "parameters": {
+        "diseaseCode": {
+          "type": "character",
+          "required": true,
+          "description": "Character vector of TCGA disease codes (e.g., c('BRCA', 'OV'))"
+        },
+        "assays": {
+          "type": "character",
+          "required": true,
+          "description": "Character vector of assay types. Supports wildcards (e.g., 'CN*', 'RNA*')"
+        },
+        "version": {
+          "type": "character",
+          "required": false,
+          "default": "2.1.1",
+          "description": "Data version (2.1.1, 2.1.0, 2.0.1, or 1.1.38)"
+        },
+        "dry.run": {
+          "type": "logical",
+          "required": false,
+          "default": false,
+          "description": "If TRUE, preview what will be downloaded without actually downloading"
+        }
+      },
+      "returns": {
+        "type": "MultiAssayExperiment",
+        "description": "Integrated multi-omic data object, or preview data.frame if dry.run=TRUE"
+      },
+      "examples": [
+        "Get breast cancer RNA-seq and mutation data",
+        "Build a dataset with BRCA RNA-seq",
+        "Download LUAD and LUSC with all copy number assays"
+      ]
+    },
+    {
+      "name": "extract_primary_tumors",
+      "description": "Filter a MultiAssayExperiment to include only primary tumor samples (TCGA sample code 01)",
+      "parameters": {
+        "mae": {
+          "type": "MultiAssayExperiment",
+          "required": true,
+          "description": "A MultiAssayExperiment object"
+        }
+      },
+      "returns": {
+        "type": "MultiAssayExperiment",
+        "description": "Filtered MultiAssayExperiment with only primary tumor samples"
+      },
+      "examples": [
+        "Filter to primary tumors only",
+        "Keep only tumor samples",
+        "Remove normal samples"
+      ]
+    },
+    {
+      "name": "get_clinical_data",
+      "description": "Extract clinical variables from a MultiAssayExperiment. Can optionally extract standard clinical variables for a specific disease code",
+      "parameters": {
+        "mae": {
+          "type": "MultiAssayExperiment",
+          "required": true,
+          "description": "A MultiAssayExperiment object"
+        },
+        "diseaseCode": {
+          "type": "character",
+          "required": false,
+          "default": null,
+          "description": "Optional disease code to get standard clinical variables"
+        }
+      },
+      "returns": {
+        "type": "data.frame",
+        "description": "Clinical data with patients as rows and variables as columns"
+      },
+      "examples": [
+        "Get clinical data",
+        "Show me the clinical variables",
+        "Extract patient information"
+      ]
+    },
+    {
+      "name": "get_subtype_info",
+      "description": "Extract cancer subtype information from a MultiAssayExperiment, including mapping of column names to subtype classifications",
+      "parameters": {
+        "mae": {
+          "type": "MultiAssayExperiment",
+          "required": true,
+          "description": "A MultiAssayExperiment object"
+        }
+      },
+      "returns": {
+        "type": "list",
+        "description": "List with 'map' (subtype mapping) and 'data' (subtype values), or NULL if no subtypes available"
+      },
+      "examples": [
+        "What subtypes are available?",
+        "Show me the cancer subtypes",
+        "Get PAM50 classifications"
+      ]
+    },
+    {
+      "name": "describe_assay",
+      "description": "Get detailed information about a specific assay/experiment in a MultiAssayExperiment",
+      "parameters": {
+        "mae": {
+          "type": "MultiAssayExperiment",
+          "required": true,
+          "description": "A MultiAssayExperiment object"
+        },
+        "assay_name": {
+          "type": "character",
+          "required": true,
+          "description": "Name of the assay to describe"
+        }
+      },
+      "returns": {
+        "type": "list",
+        "description": "Information about the assay including class, dimensions, feature names, sample names, and metadata"
+      },
+      "examples": [
+        "Describe the RNA-seq assay",
+        "What's in the mutation experiment?",
+        "Show me details about the copy number data"
+      ]
+    },
+    {
+      "name": "split_by_sample_type",
+      "description": "Split assays in a MultiAssayExperiment by TCGA sample type codes, creating separate experiments for each sample type",
+      "parameters": {
+        "mae": {
+          "type": "MultiAssayExperiment",
+          "required": true,
+          "description": "A MultiAssayExperiment object"
+        },
+        "sample_codes": {
+          "type": "character",
+          "required": false,
+          "default": ["01", "10", "11"],
+          "description": "Character vector of TCGA sample codes (e.g., '01' for primary tumor, '10' for blood normal)"
+        }
+      },
+      "returns": {
+        "type": "MultiAssayExperiment",
+        "description": "MultiAssayExperiment with experiments split by sample type"
+      },
+      "examples": [
+        "Separate tumor and normal samples",
+        "Split by sample type",
+        "Create separate experiments for each sample type"
+      ]
+    },
+
+{
+      "name": "tcga_help",
+      "description": "Display help information about using curatedTCGAData tools",
+      "parameters": {
+        "topic": {
+          "type": "character",
+          "required": false,
+          "default": null,
+          "description": "Help topic: 'diseases', 'assays', 'workflow', 'samples', or 'versions'"
+        }
+      },
+      "returns": {
+        "type": "NULL",
+        "description": "Prints help information to console"
+      },
+      "examples": [
+        "Help me get started",
+        "What assay types are there?",
+        "Show me the workflow"
+      ]
+    }
+  ],
+  "assay_types": {
+    "gene_expression": [
+      "RNASeq2Gene",
+      "RNASeq2GeneNorm",
+      "mRNAArray",
+      "RNASeqGene"
+    ],
+    "mutations": [
+      "Mutation"
+    ],
+    "copy_number": [
+      "CNASNP",
+      "CNVSNP",
+      "CNASeq",
+      "GISTIC_AllByGene",
+      "GISTIC_ThresholdedByGene",
+      "GISTIC_Peaks"
+    ],
+    "methylation": [
+      "Methylation_methyl450",
+      "Methylation_methyl27"
+    ],
+    "protein": [
+      "RPPAArray"
+    ],
+    "miRNA": [
+      "miRNASeqGene",
+      "miRNAArray"
+    ]
+  },
+  "sample_types": {
+    "01": "Primary Solid Tumor",
+    "02": "Recurrent Solid Tumor",
+    "03": "Primary Blood Derived Cancer - Peripheral Blood",
+    "06": "Metastatic",
+    "10": "Blood Derived Normal",
+    "11": "Solid Tissue Normal"
+  },
+  "disease_codes": {
+    "ACC": "Adrenocortical carcinoma",
+    "BLCA": "Bladder Urothelial Carcinoma",
+    "BRCA": "Breast invasive carcinoma",
+    "CESC": "Cervical squamous cell carcinoma and endocervical adenocarcinoma",
+    "CHOL": "Cholangiocarcinoma",
+    "COAD": "Colon adenocarcinoma",
+    "DLBC": "Lymphoid Neoplasm Diffuse Large B-cell Lymphoma",
+    "ESCA": "Esophageal carcinoma",
+    "GBM": "Glioblastoma multiforme",
+    "HNSC": "Head and Neck squamous cell carcinoma",
+    "KICH": "Kidney Chromophobe",
+    "KIRC": "Kidney renal clear cell carcinoma",
+    "KIRP": "Kidney renal papillary cell carcinoma",
+    "LAML": "Acute Myeloid Leukemia",
+    "LGG": "Brain Lower Grade Glioma",
+    "LIHC": "Liver hepatocellular carcinoma",
+    "LUAD": "Lung adenocarcinoma",
+    "LUSC": "Lung squamous cell carcinoma",
+    "MESO": "Mesothelioma",
+    "OV": "Ovarian serous cystadenocarcinoma",
+    "PAAD": "Pancreatic adenocarcinoma",
+    "PCPG": "Pheochromocytoma and Paraganglioma",
+    "PRAD": "Prostate adenocarcinoma",
+    "READ": "Rectum adenocarcinoma",
+    "SARC": "Sarcoma",
+    "SKCM": "Skin Cutaneous Melanoma",
+    "STAD": "Stomach adenocarcinoma",
+    "TGCT": "Testicular Germ Cell Tumors",
+    "THCA": "Thyroid carcinoma",
+    "THYM": "Thymoma",
+    "UCEC": "Uterine Corpus Endometrial Carcinoma",
+    "UCS": "Uterine Carcinosarcoma",
+    "UVM": "Uveal Melanoma"
+  },
+  "dependencies": {
+    "R": ">=4.0.0",
+    "packages": [
+      "curatedTCGAData",
+      "MultiAssayExperiment",
+      "TCGAutils",
+      "SummarizedExperiment",
+      "RaggedExperiment",
+      "S4Vectors",
+      "methods"
+    ]
+  },
+  "metadata": {
+    "author": "MCP Tool Developer",
+    "license": "Artistic-2.0",
+    "data_source": "TCGA via Broad Firehose",
+    "last_updated": "2025-11-02",
+    "recommended_version": "2.1.1"
+  }
+}
