@@ -10,8 +10,8 @@ This skill provides conversational tools for working with TCGA (The Cancer Genom
 **Implementation**:
 ```r
 list_cancer_types <- function() {
-  data('diseaseCodes', package = \"TCGAutils\")
-  available_codes <- diseaseCodes[diseaseCodes$Available == \"Yes\", ]
+  data('diseaseCodes', package = "TCGAutils")
+  available_codes <- diseaseCodes[diseaseCodes$Available == "Yes", ]
   
   # Format output nicely
   result <- data.frame(
@@ -25,7 +25,7 @@ list_cancer_types <- function() {
 }
 ```
 
-**Usage**: \"What cancer types are available?\" or \"Show me all TCGA disease codes\"
+**Usage**: "What cancer types are available?" or "Show me all TCGA disease codes"
 
 ---
 
@@ -34,26 +34,26 @@ list_cancer_types <- function() {
 **Purpose**: Show what data types (assays) are available for a specific disease code
 
 **Parameters**:
-- `diseaseCode`: TCGA disease code (e.g., \"BRCA\", \"COAD\")
-- `version`: Data version (default \"2.1.1\")
+- `diseaseCode`: TCGA disease code (e.g., "BRCA", "COAD")
+- `version`: Data version (default "2.1.1")
 
 **Implementation**:
 ```r
-list_assays_for_disease <- function(diseaseCode, version = \"2.1.1\") {
+list_assays_for_disease <- function(diseaseCode, version = "2.1.1") {
   library(curatedTCGAData)
   
   # Use dry.run to get available assays without downloading
   result <- curatedTCGAData(
     diseaseCode = diseaseCode,
-    assays = \"*\",
+    assays = "*",
     version = version,
     dry.run = TRUE,
     verbose = FALSE
   )
   
   # Extract and format assay names
-  assay_names <- unique(gsub(paste0(\"^\", diseaseCode, \"_\"), \"\", result$title))
-  assay_names <- gsub(\"-\\\\d{8}.*$\", \"\", assay_names)
+  assay_names <- unique(gsub(paste0("^", diseaseCode, "_"), "", result$title))
+  assay_names <- gsub("-\\\\d{8}.*$", "", assay_names)
   
   return(list(
     diseaseCode = diseaseCode,
@@ -64,7 +64,7 @@ list_assays_for_disease <- function(diseaseCode, version = \"2.1.1\") {
 }
 ```
 
-**Usage**: \"What assays are available for breast cancer?\" or \"Show me data types for BRCA\"
+**Usage**: "What assays are available for breast cancer?" or "Show me data types for BRCA"
 
 ---
 
@@ -74,19 +74,19 @@ list_assays_for_disease <- function(diseaseCode, version = \"2.1.1\") {
 
 **Parameters**:
 - `diseaseCode`: Character vector of TCGA disease codes
-- `assays`: Character vector of assay types (supports wildcards like \"CN*\", \"RNA*\")
-- `version`: Data version (default \"2.1.1\")
+- `assays`: Character vector of assay types (supports wildcards like "CN*", "RNA*")
+- `version`: Data version (default "2.1.1")
 - `dry.run`: Whether to preview before downloading (default FALSE)
 
 **Implementation**:
 ```r
-build_tcga_mae <- function(diseaseCode, assays, version = \"2.1.1\", dry.run = FALSE) {
+build_tcga_mae <- function(diseaseCode, assays, version = "2.1.1", dry.run = FALSE) {
   library(curatedTCGAData)
   library(MultiAssayExperiment)
   
-  message(sprintf(\"Building MultiAssayExperiment for %s with assays: %s\",
-                  paste(diseaseCode, collapse = \", \"),
-                  paste(assays, collapse = \", \")))
+  message(sprintf("Building MultiAssayExperiment for %s with assays: %s",
+                  paste(diseaseCode, collapse = ", "),
+                  paste(assays, collapse = ", ")))
   
   mae <- curatedTCGAData(
     diseaseCode = diseaseCode,
@@ -106,11 +106,11 @@ build_tcga_mae <- function(diseaseCode, assays, version = \"2.1.1\", dry.run = F
       n_features = nrow(mae)
     )
     
-    message(\"\
-MultiAssayExperiment Summary:\")
-    message(sprintf(\"  Diseases: %s\", paste(diseaseCode, collapse = \", \")))
-    message(sprintf(\"  Experiments: %d\", summary_info$n_experiments))
-    message(sprintf(\"  Total samples: %d\", summary_info$n_samples))
+    message("\
+MultiAssayExperiment Summary:")
+    message(sprintf("  Diseases: %s", paste(diseaseCode, collapse = ", ")))
+    message(sprintf("  Experiments: %d", summary_info$n_experiments))
+    message(sprintf("  Total samples: %d", summary_info$n_samples))
     
     return(mae)
   } else {
@@ -119,7 +119,7 @@ MultiAssayExperiment Summary:\")
 }
 ```
 
-**Usage**: \"Get breast cancer RNA-seq and mutation data\" or \"Build a MAE with BRCA and COAD with all copy number assays\"
+**Usage**: "Get breast cancer RNA-seq and mutation data" or "Build a MAE with BRCA and COAD with all copy number assays"
 
 ---
 
@@ -135,26 +135,26 @@ MultiAssayExperiment Summary:\")
 extract_primary_tumors <- function(mae) {
   library(TCGAutils)
   
-  message(\"Extracting primary tumor samples...\")
+  message("Extracting primary tumor samples...")
   primary_mae <- TCGAprimaryTumors(mae)
   
   # Show sample counts before and after
   orig_samples <- sampleTables(mae)
   new_samples <- sampleTables(primary_mae)
   
-  message(\"\
-Sample counts:\")
-  message(\"Original:\")
+  message("\
+Sample counts:")
+  message("Original:")
   print(orig_samples)
-  message(\"\
-Primary tumors only:\")
+  message("\
+Primary tumors only:")
   print(new_samples)
   
   return(primary_mae)
 }
 ```
 
-**Usage**: \"Filter to primary tumors only\" or \"Keep only the primary tumor samples\"
+**Usage**: "Filter to primary tumors only" or "Keep only the primary tumor samples"
 
 ---
 
@@ -180,8 +180,8 @@ get_clinical_data <- function(mae, diseaseCode = NULL) {
     # Check which are available
     available_vars <- standard_vars[standard_vars %in% names(clinical_data)]
     
-    message(sprintf(\"Standard clinical variables for %s:\", diseaseCode))
-    message(sprintf(\"  Available: %s\", paste(available_vars, collapse = \", \")))
+    message(sprintf("Standard clinical variables for %s:", diseaseCode))
+    message(sprintf("  Available: %s", paste(available_vars, collapse = ", ")))
     
     if (length(available_vars) > 0) {
       clinical_subset <- clinical_data[, available_vars, drop = FALSE]
@@ -193,7 +193,7 @@ get_clinical_data <- function(mae, diseaseCode = NULL) {
 }
 ```
 
-**Usage**: \"Get clinical data\" or \"Show me the clinical variables for BRCA\"
+**Usage**: "Get clinical data" or "Show me the clinical variables for BRCA"
 
 ---
 
@@ -212,7 +212,7 @@ get_subtype_info <- function(mae) {
   subtype_map <- getSubtypeMap(mae)
   
   if (nrow(subtype_map) > 0) {
-    message(\"Available subtype information:\")
+    message("Available subtype information:")
     print(subtype_map)
     
     # Extract subtype columns from colData
@@ -229,13 +229,13 @@ get_subtype_info <- function(mae) {
       ))
     }
   } else {
-    message(\"No subtype information available for this dataset.\")
+    message("No subtype information available for this dataset.")
     return(NULL)
   }
 }
 ```
 
-**Usage**: \"What subtypes are available?\" or \"Show me the subtype classifications\"
+**Usage**: "What subtypes are available?" or "Show me the subtype classifications"
 
 ---
 
@@ -251,8 +251,8 @@ get_subtype_info <- function(mae) {
 ```r
 describe_assay <- function(mae, assay_name) {
   if (!assay_name %in% names(experiments(mae))) {
-    stop(sprintf(\"Assay '%s' not found. Available assays: %s\",
-                 assay_name, paste(names(experiments(mae)), collapse = \", \")))
+    stop(sprintf("Assay '%s' not found. Available assays: %s",
+                 assay_name, paste(names(experiments(mae)), collapse = ", ")))
   }
   
   assay_data <- experiments(mae)[[assay_name]]
@@ -268,23 +268,23 @@ describe_assay <- function(mae, assay_name) {
   )
   
   # Additional info for specific classes
-  if (is(assay_data, \"RaggedExperiment\")) {
+  if (is(assay_data, "RaggedExperiment")) {
     info$metadata_columns <- names(mcols(assay_data))
-  } else if (is(assay_data, \"SummarizedExperiment\")) {
+  } else if (is(assay_data, "SummarizedExperiment")) {
     info$assay_names <- assayNames(assay_data)
     info$col_data_columns <- names(colData(assay_data))
   }
   
-  message(sprintf(\"\
-Assay: %s\", info$name))
-  message(sprintf(\"Class: %s\", info$class))
-  message(sprintf(\"Dimensions: %d features × %d samples\", info$n_features, info$n_samples))
+  message(sprintf("\
+Assay: %s", info$name))
+  message(sprintf("Class: %s", info$class))
+  message(sprintf("Dimensions: %d features × %d samples", info$n_features, info$n_samples))
   
   return(info)
 }
 ```
 
-**Usage**: \"Describe the mutation assay\" or \"What's in the RNASeq2Gene experiment?\"
+**Usage**: "Describe the mutation assay" or "What's in the RNASeq2Gene experiment?"
 
 ---
 
@@ -292,55 +292,55 @@ Assay: %s\", info$name))
 
 ### Example 1: Basic Workflow
 ```
-User: \"I want to work with breast cancer data\"
-Assistant: [calls list_assays_for_disease(\"BRCA\")]
-         \"Breast cancer (BRCA) has the following assays available: [lists assays]
-          Which assays would you like to include?\"
+User: "I want to work with breast cancer data"
+Assistant: [calls list_assays_for_disease("BRCA")]
+         "Breast cancer (BRCA) has the following assays available: [lists assays]
+          Which assays would you like to include?"
 
-User: \"Get me RNA-seq and mutation data\"
-Assistant: [calls build_tcga_mae(diseaseCode=\"BRCA\", assays=c(\"RNASeq2Gene\", \"Mutation\"))]
-         \"I've built your MultiAssayExperiment with 2 experiments...\"
+User: "Get me RNA-seq and mutation data"
+Assistant: [calls build_tcga_mae(diseaseCode="BRCA", assays=c("RNASeq2Gene", "Mutation"))]
+         "I've built your MultiAssayExperiment with 2 experiments..."
 
-User: \"Filter to primary tumors only\"
+User: "Filter to primary tumors only"
 Assistant: [calls extract_primary_tumors(mae)]
-         \"Filtered to primary tumors. Original had X samples, now Y samples...\"
+         "Filtered to primary tumors. Original had X samples, now Y samples..."
 ```
 
 ### Example 2: Multi-Cancer Comparison
 ```
-User: \"Compare lung adenocarcinoma and lung squamous cell carcinoma\"
+User: "Compare lung adenocarcinoma and lung squamous cell carcinoma"
 Assistant: [calls list_assays_for_disease for both LUAD and LUSC]
-         \"Both LUAD and LUSC have these common assays: [lists]
-          Would you like to build a combined dataset?\"
+         "Both LUAD and LUSC have these common assays: [lists]
+          Would you like to build a combined dataset?"
 
-User: \"Yes, get RNA-seq for both\"
-Assistant: [calls build_tcga_mae(diseaseCode=c(\"LUAD\", \"LUSC\"), assays=\"RNASeq2Gene\")]
-         \"Created MultiAssayExperiment with RNA-seq data for both cancer types...\"
+User: "Yes, get RNA-seq for both"
+Assistant: [calls build_tcga_mae(diseaseCode=c("LUAD", "LUSC"), assays="RNASeq2Gene")]
+         "Created MultiAssayExperiment with RNA-seq data for both cancer types..."
 ```
 
 ### Example 3: Exploring Available Data
 ```
-User: \"What cancer types can I analyze?\"
+User: "What cancer types can I analyze?"
 Assistant: [calls list_cancer_types()]
-         \"Here are all 33 available TCGA cancer types: [shows table]\"
+         "Here are all 33 available TCGA cancer types: [shows table]"
 
-User: \"What data is available for colorectal cancer?\"
-Assistant: [calls list_assays_for_disease(\"COAD\")]
-         \"COAD (Colon adenocarcinoma) has these assays: [lists]\"
+User: "What data is available for colorectal cancer?"
+Assistant: [calls list_assays_for_disease("COAD")]
+         "COAD (Colon adenocarcinoma) has these assays: [lists]"
 ```
 
 ## Common Assay Patterns
 
 Users often request data using natural language. Here are mappings:
 
-- **\"RNA-seq\"** → `RNASeq2Gene` or `RNASeq2GeneNorm`
-- **\"gene expression\"** → `RNASeq2Gene`, `mRNAArray`
-- **\"mutations\"** → `Mutation`
-- **\"copy number\"** → `CNASNP`, `CNVSNP`, `CNASeq`, or `CN*` (wildcard)
-- **\"methylation\"** → `Methylation_methyl450`, `Methylation_methyl27`
-- **\"protein\"** → `RPPAArray`
-- **\"miRNA\"** → `miRNASeqGene`
-- **\"GISTIC\"** → `GISTIC_AllByGene`, `GISTIC_ThresholdedByGene`
+- **"RNA-seq"** → `RNASeq2Gene` or `RNASeq2GeneNorm`
+- **"gene expression"** → `RNASeq2Gene`, `mRNAArray`
+- **"mutations"** → `Mutation`
+- **"copy number"** → `CNASNP`, `CNVSNP`, `CNASeq`, or `CN*` (wildcard)
+- **"methylation"** → `Methylation_methyl450`, `Methylation_methyl27`
+- **"protein"** → `RPPAArray`
+- **"miRNA"** → `miRNASeqGene`
+- **"GISTIC"** → `GISTIC_AllByGene`, `GISTIC_ThresholdedByGene`
 
 ## Best Practices
 
@@ -364,10 +364,10 @@ Common issues and solutions:
 ## Integration with Analysis
 
 After building a MAE, suggest next steps:
-- \"Would you like to filter to primary tumors?\"
-- \"Shall I extract the clinical data?\"
-- \"Would you like to see the subtype information?\"
-- \"Ready to perform differential expression analysis?\"
+- "Would you like to filter to primary tumors?"
+- "Shall I extract the clinical data?"
+- "Would you like to see the subtype information?"
+- "Ready to perform differential expression analysis?"
 
 ## Version Information
 
