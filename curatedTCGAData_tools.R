@@ -6,7 +6,7 @@
 #' @export
 list_cancer_types <- function() {
   data('diseaseCodes', package = "TCGAutils")
-  available_codes <- TCGAutils::diseaseCodes[TCGAutils::diseaseCodes$Available == "Yes", ]
+  available_codes <- diseaseCodes[diseaseCodes$Available == "Yes", ]
   
   result <- data.frame(
     Code = available_codes$Study.Abbreviation,
@@ -334,7 +334,7 @@ split_by_sample_type <- function(mae, sample_codes = c("01", "10", "11")) {
   data('sampleTypes', package = "TCGAutils")
   
   message("Sample codes requested:")
-  selected_types <- TCGAutils::sampleTypes[TCGAutils::sampleTypes$Code %in% sample_codes, ]
+  selected_types <- sampleTypes[sampleTypes$Code %in% sample_codes, ]
   print(selected_types[, c("Code", "Definition")])
   
   message("\
